@@ -7,7 +7,6 @@ import numpy as np
 def solve_with_cum_sum(arr):
 	cum_sum = np.zeros((len(arr))).astype(int)
 	max_sum = -1000000
-	inds = (0, 0)
 	for i in range(len(arr)):
 		if i==0:
 			cum_sum[i] = arr[i]
