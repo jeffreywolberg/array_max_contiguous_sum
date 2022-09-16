@@ -1,12 +1,10 @@
-import math
 import random
 from time import time
-from turtle import right
 import numpy as np
 
 def solve_with_cum_sum(arr):
 	cum_sum = np.zeros((len(arr))).astype(int)
-	max_sum = -1000000
+	max_sum = -100000000
 	for i in range(len(arr)):
 		if i==0:
 			cum_sum[i] = arr[i]
@@ -18,6 +16,9 @@ def solve_with_cum_sum(arr):
 			if cum_sum_diff > max_sum or (cum_sum_diff == max_sum and i-j < inds[1] - inds[0]):
 				max_sum = cum_sum_diff
 				inds = (j, i)
+		if arr[i] >= max_sum:
+			max_sum = arr[i]
+			inds = (i, i)
 	return inds[0], inds[1], max_sum	
 
 def __get_mid_sum(range:range):
@@ -34,11 +35,12 @@ def __get_mid_sum(range:range):
 		pos = pos - 1 if decrement else pos + 1
 	return best_pos, max_sum
 
-
+# return the max mid sum
 def get_mid_sum(arr, i, j):
 	mid = (i + j) // 2
 	ind_left,  max_sum_left = __get_mid_sum(range(mid, i))
 	ind_right, max_sum_right = __get_mid_sum(range(mid, j))
+	# subtract arr[mid] to not double count it 
 	mid_sum = max_sum_right + max_sum_left - arr[mid]
 	return ind_left, ind_right, mid_sum
 
@@ -80,20 +82,20 @@ def solve_with_div_conquer(arr, i, j):
 		return ind_mid_left, ind_mid_right, mid_sum
 
 if __name__ == '__main__':
-	k = 20000
-	numbers = np.linspace(-k, k, k).astype(np.int64)
-	arr = random.choices(numbers, k=k//2)
+	n = 20
+	numbers = np.arange(-n, n).astype(np.int64)
+	arr = random.choices(numbers, k=n)
 
-	# print(arr)
+	print(arr)
 	st2 = time()
 	ind_left2, ind_right2, sum2 = solve_with_div_conquer(arr, 0, len(arr)-1)
-	et2 = round(time() - st2, 3)
+	et2 = round(time() - st2, 2)
 
 	print(f"Div conquer method -- indices: [{ind_left2}, {ind_right2}], sum: {sum2}, runtime: {et2}")
 
 	st1 = time()
 	ind_left, ind_right, sum = solve_with_cum_sum(arr)
-	et1 = round(time() - st1, 3)
+	et1 = round(time() - st1, 2)
 	print(f"Cum sum method -- indices: [{ind_left}, {ind_right}], sum: {sum}, runtime: {et1}")
 
 
