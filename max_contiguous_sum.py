@@ -1,25 +1,37 @@
+import math
 import random
 from time import time
 import numpy as np
 
-def solve_with_cum_sum(arr):
-	cum_sum = np.zeros((len(arr))).astype(int)
-	max_sum = -100000000
-	for i in range(len(arr)):
-		if i==0:
-			cum_sum[i] = arr[i]
+def solve_with_dp(arr):
+	cur_arr_sum = arr[0]
+	max_arr_sum = arr[0]
+	start_ind = 0
+	inds = [0, 0]
+	for i in range(1, len(arr)):
+		if cur_arr_sum <= 0:
+			cur_arr_sum = arr[i]
+			start_ind = i
 		else:
-			cum_sum[i] = cum_sum[i-1] + arr[i]
-		for j in range(i):
-			cum_sum_diff = cum_sum[i] - (cum_sum[j] - arr[j])
-			# if cum_sum_diff is larger than max_sum, or if cum_sum_diff is equal but uses smaller index range
-			if cum_sum_diff > max_sum or (cum_sum_diff == max_sum and i-j < inds[1] - inds[0]):
-				max_sum = cum_sum_diff
-				inds = (j, i)
-		if arr[i] >= max_sum:
-			max_sum = arr[i]
-			inds = (i, i)
-	return inds[0], inds[1], max_sum	
+			cur_arr_sum += arr[i]
+
+		if cur_arr_sum > max_arr_sum:
+			max_arr_sum = cur_arr_sum
+			inds = [start_ind, i]
+	
+	return inds[0], inds[1], max_arr_sum
+
+
+def solve_with_brute_force(arr):
+	max_sum = -math.inf
+	for i in range(len(arr)):
+		cur_sum = 0
+		for j in range(i, len(arr)):
+			cur_sum += arr[j]
+			if cur_sum >= max_sum:
+				inds = (i, j)
+				max_sum = cur_sum
+	return inds[0], inds[1], max_sum
 
 def __get_mid_sum(range:range):
 	decrement = True if range.stop < range.start else False
@@ -62,9 +74,9 @@ def solve_with_div_conquer(arr, i, j):
 			else:
 				return i, i, arr[i]
 
-	ind_left_left, ind_left_right, left_sum = solve_with_div_conquer(arr, i, (i+j)//2)
+	ind_left_left, ind_left_right, left_sum = solve_with_div_conquer(arr, i, (i+j)//2 - 1)
 	ind_mid_left, ind_mid_right, mid_sum = get_mid_sum(arr, i, j)
-	ind_right_left, ind_right_right, right_sum = solve_with_div_conquer(arr, i+(j-i)//2, j)
+	ind_right_left, ind_right_right, right_sum = solve_with_div_conquer(arr, i + (j-i)//2 + 1, j)
 
 	# Get max of left vs right vs mid: first criteria is max sum, if equal, then look at smallest diff in index (multiplying the diff by -1 and then taking the max does the same thing)
 	left = [left_sum, -1 * (ind_left_right-ind_left_left)]
@@ -82,21 +94,27 @@ def solve_with_div_conquer(arr, i, j):
 		return ind_mid_left, ind_mid_right, mid_sum
 
 if __name__ == '__main__':
-	n = 20
+	n = 500000
 	numbers = np.arange(-n, n).astype(np.int64)
 	arr = random.choices(numbers, k=n)
 
-	print(arr)
 	st2 = time()
 	ind_left2, ind_right2, sum2 = solve_with_div_conquer(arr, 0, len(arr)-1)
-	et2 = round(time() - st2, 2)
-
+	et2 = round(time() - st2, 4)
 	print(f"Div conquer method -- indices: [{ind_left2}, {ind_right2}], sum: {sum2}, runtime: {et2}")
 
-	st1 = time()
-	ind_left, ind_right, sum = solve_with_cum_sum(arr)
-	et1 = round(time() - st1, 2)
-	print(f"Cum sum method -- indices: [{ind_left}, {ind_right}], sum: {sum}, runtime: {et1}")
+	# st3 = time()
+	# ind_left3, ind_right3, sum3 = solve_with_brute_force(arr)
+	# et3 = round(time() - st3, 4)
+	# print(f"Brute force method -- indices: [{ind_left3}, {ind_right3}], sum: {sum3}, runtime: {et3}")
+
+	st4 = time()
+	ind_left4, ind_right4, sum4 = solve_with_dp(arr)
+	et4 = round(time() - st4, 4)
+	print(f"DP method -- indices: [{ind_left4}, {ind_right4}], sum: {sum4}, runtime: {et4}")
+
+	
+
 
 
 
